@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="index.js"></script>
+    <script>
+      const { Renderer, Store, RSSFetcher } = core
+
+      const renderer = new Renderer()
+      const store = new Store()
+      const fetcher = new RSSFetcher(store)
+
+      ;(async () => {
+        const feedUrl = 'https://blog.cloudflare.com/rss/'
+        const feed = await fetcher.fetch(feedUrl)
+        console.log(feed)
+        renderer.add(feed)
+      })()
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "home",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "browser-require": "^0.1.6",
+    "fastify": "^2.14.1",
+    "lodash.set": "^4.3.2",
+    "rss-parser": "^3.8.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^12.0.0",
+    "@rollup/plugin-json": "^4.0.3",
+    "@rollup/plugin-node-resolve": "^8.0.0",
+    "rollup": "^2.12.0",
+    "rollup-plugin-node-polyfills": "^0.2.1"
+  }
+}
