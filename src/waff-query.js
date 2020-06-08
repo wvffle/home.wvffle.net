@@ -36,12 +36,12 @@ export const e = (s, ...c) => {
     }
 
     const html = sanitize(child.toString(), {
-      allowedTags: ['a'],
-      allowedAttributes: { a: ['href'] }
+      allowedTags: ['a', 'img'],
+      allowedAttributes: { a: ['href'], img: ['src'] }
     })
 
-    const xml = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/xml')
-    el.appendChild(xml.children[0])
+    const xml = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html')
+    el.appendChild(xml.querySelector('body').children[0])
   }
 
   return el
