@@ -24,7 +24,6 @@ export const ps = s => {
 
 export const e = (s, ...c) => {
   const { tag, id, className } = ps(s)
-
   const el = document.createElement(tag)
 
   if (id) {
@@ -65,6 +64,7 @@ RSSParser.prototype.parseURL = function (url) {
 // RSS parser
 export const parser = new RSSParser()
 
+
 /**
  * Random utils
  */
@@ -80,26 +80,27 @@ export class Random {
 
 
 export class Renderer {
-  #items = new PriorityQueue((a, b) => a.date > b.date)
+  #items = []
 
   constructor (rootSelector = '#app') {
     this.root = q(rootSelector)
   }
 
+  clear () {
+    this.#items.length = 0
+  }
+
   add (...items) {
     for (const item of items) {
-      this.#items.add(item)
+      this.#items.push(item)
     }
   }
 
   render () {
-    for (const el of this.root.children) {
-      el.remove()
-    }
-
-    this.#items.forEach(item => {
+    this.root.innerHTML = ''
+    for (const item of [...this.#items].sort((a, b) => b.date - a.date)) {
       this.root.appendChild(item.render())
-    })
+    }
   }
 }
 
@@ -107,58 +108,123 @@ export class Renderer {
  * Class responsible for serialization/deserialization
  */
 export class Serializable {
+  /**
+   * Method used to serialize instance into JSON compatible object
+   * @abstract
+   * @returns {Object|String|Number}
+   */
+  serialize () {}
+
+  /**
+   * Method used to deserialize serialized data into a new instance
+   * @abstract
+   * @returns {Serializable}
+   */
+  static deserialize () {}
+}
+
+export class Value extends Serializable {
   constructor (value) {
+    super()
     this.value = value
   }
 
   /**
-   * Method used to serialize instance into JSON compatible object
-   * @returns {Object|String|Number}
+   * @inheritdoc
+   * @override
    */
-  serializer () {
-    return this.value
-  }
-  
-  /**
-   * Method used to deserialize serialized data into a new instance
-   * @returns {Serializable}
-   */
-  static deserializer (data) {
-    return new Serializable(data)
+  serialize () {
+    return { value: this.value }
   }
 
   /**
-   * Serialize data
-   * @returns String
+   * @inheritdoc
+   * @override
    */
-  serialize () { 
-    const className = this.value instanceof Serializable
-      ? this.value.constructor.name
-      : undefined
+  static deserialize ({ value }) {
+    return value
+  }
+}
 
-    const value = className === undefined
-      ? this.value
-      : value.serializer()
-
-    return JSON.stringify({ className, value }) 
+/**
+ * Enchanced JSON.parse/stringify
+ */
+export class Serializer {
+  static cache = {
+    Serializable,
+    Value
   }
 
-  /**
-   * Deserialize data
-   * @returns {Object|Serializable}
-   */
-  static deserialize (string) { 
-    if (string === undefined) {
-      return undefined
+  static register (Class) {
+    Serializer.cache[Class.name] = Class
+  }
+
+  static stringify (data) {
+    if (Array.isArray(data)) {
+      return `[${data.map(Serializer.stringify)}]`
     }
 
-    const data = JSON.parse(string) 
+    if (data.constructor.name === 'Object') {
+      const value = Object.entries(data).map(([key, value]) => {
+        return `"${key}":${Serializer.stringify(value)}`
+      }).join(',')
 
-    if (data.className) { 
-      return core[data.className].deserializer(data.value)
+      return `{${value}}`
     }
 
-    return data.value
+    if (data instanceof Serializable) {
+      return `{"$type":"Serializable","$class":"${data.constructor.name}","$value":${Serializer.stringify(data.serialize())}}`
+    }
+
+    if (typeof data === 'number') {
+      return data
+    }
+
+    if (typeof data === 'string') {
+      return `"${data.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
+    }
+
+    return `{"$type":"${data.constructor.name}","$value":"${data}"}`
+  }
+
+  static parse (data) {
+    const json = JSON.parse(data)
+
+    const parse = (data) => {
+      if (data === undefined) {
+        return undefined
+      }
+
+      if (Array.isArray(data)) {
+        return data.map(parse)
+      }
+
+      if (data.constructor.name === 'Object' && !('$type' in data)) {
+        const res = {}
+
+        for (const [key, value] of Object.entries(data)) {
+          res[key] = parse(value)
+        }
+
+        return res
+      }
+
+      if (typeof data === 'string' || typeof data === 'number') {
+        return data
+      }
+
+      if (data.$type === 'Serializable') {
+        const value = parse(data.$value)
+        return Serializer.cache[data.$class].deserialize(value)
+      }
+
+      const Class = window[data.$type]
+      return 'parse' in Class
+        ? Class.parse(data.$value)
+        : Class(data.$value)
+    }
+
+    return parse(json)
   }
 }
 
@@ -177,11 +243,17 @@ export class Store {
           return target[prop]
         }
 
-        return target.cache[prop] || Serializable.deserialize(localStorage[prop])
+        const value = target.cache[prop] || localStorage[prop]
+
+        if (value) {
+          return Serializer.parse(value)
+        }
+
+        return undefined
       },
 
       set (target, prop, value) {
-        return target.cache = localStorage[prop] = new Serializable(value).serialize()
+        return target.cache[prop] = localStorage[prop] = Serializer.stringify(new Value(value))
       }
     })
   }
@@ -201,7 +273,7 @@ export class Store {
 
 export class RSSFeed extends Serializable {
   constructor (data, meta) {
-    super()
+    super() 
 
     this.data = data
     this.meta = meta
@@ -232,15 +304,25 @@ export class RSSFeed extends Serializable {
     )
   }
 
-  serializer () {
+  /**
+   * @inheritdoc
+   * @override
+   */
+  serialize () {
     const { data, meta } = this
     return { data, meta }
   }
 
+  /**
+   * @inheritdoc
+   * @override
+   */
   static deserialize ({ data, meta }) {
-    return new this.constructor(data, meta)
+    return new RSSFeed(data, meta)
   }
 }
+
+Serializer.register(RSSFeed)
 
 export class RSSFetcher {
   constructor (store) {

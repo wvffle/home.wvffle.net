@@ -1,4 +1,4 @@
-function _classPrivateFieldGet(receiver,privateMap){var descriptor=privateMap.get(receiver);if(!descriptor){throw new TypeError("attempted to get private field on non-instance");}if(descriptor.get){return descriptor.get.call(receiver);}return descriptor.value;}var commonjsGlobal=typeof globalThis!=='undefined'?globalThis:typeof window!=='undefined'?window:typeof global!=='undefined'?global:typeof self!=='undefined'?self:{};function unwrapExports(x){return x&&x.__esModule&&Object.prototype.hasOwnProperty.call(x,'default')?x['default']:x;}function createCommonjsModule(fn,basedir,module){return module={path:basedir,exports:{},require:function(path,base){return commonjsRequire(path,base===undefined||base===null?module.path:base);}},fn(module,module.exports),module.exports;}function commonjsRequire(){throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');}/**
+function _defineProperty(obj,key,value){if(key in obj){Object.defineProperty(obj,key,{value:value,enumerable:true,configurable:true,writable:true});}else{obj[key]=value;}return obj;}function _classPrivateFieldGet(receiver,privateMap){var descriptor=privateMap.get(receiver);if(!descriptor){throw new TypeError("attempted to get private field on non-instance");}if(descriptor.get){return descriptor.get.call(receiver);}return descriptor.value;}var commonjsGlobal=typeof globalThis!=='undefined'?globalThis:typeof window!=='undefined'?window:typeof global!=='undefined'?global:typeof self!=='undefined'?self:{};function unwrapExports(x){return x&&x.__esModule&&Object.prototype.hasOwnProperty.call(x,'default')?x['default']:x;}function createCommonjsModule(fn,basedir,module){return module={path:basedir,exports:{},require:function(path,base){return commonjsRequire(path,base===undefined||base===null?module.path:base);}},fn(module,module.exports),module.exports;}function commonjsRequire(){throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');}/**
  * lodash (Custom Build) <https://lodash.com/>
  * Build: `lodash modularize exports="npm" -o ./`
  * Copyright jQuery Foundation and other contributors <https://jquery.org/>
@@ -5488,29 +5488,39 @@ const parser=new RSSParser();/**
  * Random utils
  */class Random{/**
    * Random id
-   */static get Id(){return'x'+(Math.random()*1e4^0).toString(16);}}class Renderer{constructor(rootSelector='#app'){_items.set(this,{writable:true,value:new FastPriorityQueue_1((a,b)=>a.date>b.date)});this.root=q(rootSelector);}add(...items){for(const item of items){_classPrivateFieldGet(this,_items).add(item);}}render(){for(const el of this.root.children){el.remove();}_classPrivateFieldGet(this,_items).forEach(item=>{this.root.appendChild(item.render());});}}/**
+   */static get Id(){return'x'+(Math.random()*1e4^0).toString(16);}}class Renderer{constructor(rootSelector='#app'){_items.set(this,{writable:true,value:[]});this.root=q(rootSelector);}clear(){_classPrivateFieldGet(this,_items).length=0;}add(...items){for(const item of items){_classPrivateFieldGet(this,_items).push(item);}}render(){this.root.innerHTML='';for(const item of[..._classPrivateFieldGet(this,_items)].sort((a,b)=>b.date-a.date)){this.root.appendChild(item.render());}}}/**
  * Class responsible for serialization/deserialization
- */var _items=new WeakMap();class Serializable{constructor(value){this.value=value;}/**
+ */var _items=new WeakMap();class Serializable{/**
    * Method used to serialize instance into JSON compatible object
+   * @abstract
    * @returns {Object|String|Number}
-   */serializer(){return this.value;}/**
+   */serialize(){}/**
    * Method used to deserialize serialized data into a new instance
+   * @abstract
    * @returns {Serializable}
-   */static deserializer(data){return new Serializable(data);}/**
-   * Serialize data
-   * @returns String
-   */serialize(){const className=this.value instanceof Serializable?this.value.constructor.name:undefined;const value=className===undefined?this.value:value.serializer();return JSON.stringify({className,value});}/**
-   * Deserialize data
-   * @returns {Object|Serializable}
-   */static deserialize(string){if(string===undefined){return undefined;}const data=JSON.parse(string);if(data.className){return core[data.className].deserializer(data.value);}return data.value;}}/**
+   */static deserialize(){}}class Value extends Serializable{constructor(value){super();this.value=value;}/**
+   * @inheritdoc
+   * @override
+   */serialize(){return{value:this.value};}/**
+   * @inheritdoc
+   * @override
+   */static deserialize({value}){return value;}}/**
+ * Enchanced JSON.parse/stringify
+ */class Serializer{static register(Class){Serializer.cache[Class.name]=Class;}static stringify(data){if(Array.isArray(data)){return`[${data.map(Serializer.stringify)}]`;}if(data.constructor.name==='Object'){const value=Object.entries(data).map(([key,value])=>{return`"${key}":${Serializer.stringify(value)}`;}).join(',');return`{${value}}`;}if(data instanceof Serializable){return`{"$type":"Serializable","$class":"${data.constructor.name}","$value":${Serializer.stringify(data.serialize())}}`;}if(typeof data==='number'){return data;}if(typeof data==='string'){return`"${data.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"`;}return`{"$type":"${data.constructor.name}","$value":"${data}"}`;}static parse(data){const json=JSON.parse(data);const parse=data=>{if(data===undefined){return undefined;}if(Array.isArray(data)){return data.map(parse);}if(data.constructor.name==='Object'&&!('$type'in data)){const res={};for(const[key,value]of Object.entries(data)){res[key]=parse(value);}return res;}if(typeof data==='string'||typeof data==='number'){return data;}if(data.$type==='Serializable'){const value=parse(data.$value);return Serializer.cache[data.$class].deserialize(value);}const Class=window[data.$type];return'parse'in Class?Class.parse(data.$value):Class(data.$value);};return parse(json);}}/**
  * Global store
- */class Store{constructor(){this.cache={};// NOTE: Yeah, javascript pretty much allows to return from a constructor.
+ */_defineProperty(Serializer,"cache",{Serializable,Value});class Store{constructor(){this.cache={};// NOTE: Yeah, javascript pretty much allows to return from a constructor.
 //       I've done some crazy stuff with that in the past.
-return new Proxy(this,{get(target,prop){if(prop[0]==='$'){return target[prop];}return target.cache[prop]||Serializable.deserialize(localStorage[prop]);},set(target,prop,value){return target.cache=localStorage[prop]=new Serializable(value).serialize();}});}/**
+return new Proxy(this,{get(target,prop){if(prop[0]==='$'){return target[prop];}const value=target.cache[prop]||localStorage[prop];if(value){return Serializer.parse(value);}return undefined;},set(target,prop,value){return target.cache[prop]=localStorage[prop]=Serializer.stringify(new Value(value));}});}/**
    * Method called when non-primitive values is updated
    */$update(key){this[key]=this[key];}$set(key,index,value){lodash_set(this[key],index,value);this.$update(key);}}class RSSFeed extends Serializable{constructor(data,meta){super();this.data=data;this.meta=meta;this.date=new Date(data.pubDate);}/**
    * Renders the feed
    * @returns {HTMLElement}
-   */render(){const img=e('img.h-8.w-8.flex-shrink-0.mr-4');img.src=`https://besticon-demo.herokuapp.com/icon?size=32..48..80&url=${this.meta.link}`;const a=e('a.flex.items-center',img,e('.truncate.w-full',e('h1.font-bold.font-lg.text-gray-800',this.data.title),e('.text-gray-700.text-xs.font-mono',this.date.toLocaleString())));a.href=this.data.link;return e(`#${Random.Id}.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`,a,e('.content.text-gray-900.pt-4',this.data.content));}serializer(){const{data,meta}=this;return{data,meta};}static deserialize({data,meta}){return new this.constructor(data,meta);}}class RSSFetcher{constructor(store){if(!store.feedTypes){store.feedTypes=[];}this.store=store;}addFeed(regex,Feed){this.store.$set('feedTypes',store.feedTypes.length,{regex,Feed});}/**
+   */render(){const img=e('img.h-8.w-8.flex-shrink-0.mr-4');img.src=`https://besticon-demo.herokuapp.com/icon?size=32..48..80&url=${this.meta.link}`;const a=e('a.flex.items-center',img,e('.truncate.w-full',e('h1.font-bold.font-lg.text-gray-800',this.data.title),e('.text-gray-700.text-xs.font-mono',this.date.toLocaleString())));a.href=this.data.link;return e(`#${Random.Id}.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`,a,e('.content.text-gray-900.pt-4',this.data.content));}/**
+   * @inheritdoc
+   * @override
+   */serialize(){const{data,meta}=this;return{data,meta};}/**
+   * @inheritdoc
+   * @override
+   */static deserialize({data,meta}){return new RSSFeed(data,meta);}}Serializer.register(RSSFeed);class RSSFetcher{constructor(store){if(!store.feedTypes){store.feedTypes=[];}this.store=store;}addFeed(regex,Feed){this.store.$set('feedTypes',store.feedTypes.length,{regex,Feed});}/**
    * Fetch rss feed
-   */async fetch(url){const data=await parser.parseURL(url);const meta={...data};delete meta.items;let FeedClass=RSSFeed;for(const{regex,Feed}of this.store.feedTypes){if(regex.test(url)){FeedClass=Feed;break;}}return data.items.map(item=>new FeedClass(item,meta));}}export{FETCH_INTERVAL,RSSFeed,RSSFetcher,Random,Renderer,Serializable,Store,e,parser,ps,q,qq};
+   */async fetch(url){const data=await parser.parseURL(url);const meta={...data};delete meta.items;let FeedClass=RSSFeed;for(const{regex,Feed}of this.store.feedTypes){if(regex.test(url)){FeedClass=Feed;break;}}return data.items.map(item=>new FeedClass(item,meta));}}export{FETCH_INTERVAL,RSSFeed,RSSFetcher,Random,Renderer,Serializable,Serializer,Store,Value,e,parser,ps,q,qq};

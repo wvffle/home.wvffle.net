@@ -883,6 +883,11 @@ ansi-styles@^3.2.1:
   dependencies:
     color-convert "^1.9.0"
 
+any-serialize@^1.4.12:
+  version "1.4.12"
+  resolved "https://registry.yarnpkg.com/any-serialize/-/any-serialize-1.4.12.tgz#fbfaf3c4c1313f87e0624be1f345dc729eda047e"
+  integrity sha512-cN5qx3w1GD8DLVvpGz7sCL44HGMxJdCkyoEyNe3jO8da3cOLL8Auy5lTip4Oy1SWAoftjvrsdnAg0bOkPcWM+Q==
+
 archy@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/archy/-/archy-1.0.0.tgz#f9c8c13757cc1dd7bc379ac77b2c62a5c2868c40"

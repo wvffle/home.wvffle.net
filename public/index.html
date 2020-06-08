@@ -32,7 +32,7 @@
       <div id="app"> </div>
     </div>
     <script async type="module">
-      import { Renderer, Store, RSSFetcher, q } from './index.js'
+      import { Renderer, Store, RSSFetcher, Serializer, Serializable, q } from './index.js'
 
       const input = q('input')
 
@@ -49,14 +49,15 @@
       const fetcher = new RSSFetcher(store)
 
       window.store = store
+      window.Serializer = Serializer
 
       const FEED_URLS = [
         'https://blog.cloudflare.com/rss/',
-        // 'https://css-tricks.com/feed/',
-        // 'https://www.archlinux.org/feeds/planet/',
-        // 'https://www.xkcd.com/rss.xml',
-        // 'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
-        // 'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
+        'https://css-tricks.com/feed/',
+        'https://www.archlinux.org/feeds/planet/',
+        'https://www.xkcd.com/rss.xml',
+        'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
+        'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
       ]
 
       Promise.resolve().then(async () => {
