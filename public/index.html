@@ -1,10 +1,11 @@
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
     <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
   </head>
-  <body>
-    <div id="app"></div>
+  <body class="bg-orange-400">
+    <div id="app" style="width: 666px" class="mx-auto"></div>
     <script async type="module">
       import { Renderer, Store, RSSFetcher } from './index.js'
 
