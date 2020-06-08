@@ -44,7 +44,7 @@ export const e = (s, ...c) => {
     }
 
     const html = sanitize(child.toString(), {
-      allowedTags: ['a', 'b', 'i', 'em', 'strong'],
+      allowedTags: ['a'],
       allowedAttributes: { a: ['href'] }
     })
 
@@ -200,28 +200,45 @@ export class Store {
 }
 
 export class RSSFeed extends Serializable {
-  constructor (data) {
+  constructor (data, meta) {
     super()
 
     this.data = data
+    this.meta = meta
     this.date = new Date(data.pubDate)
   }
 
+  /**
+   * Renders the feed
+   * @returns {HTMLElement}
+   */
   render () {
+    const img = e('img.h-8.w-8.flex-shrink-0.mr-4')
+    img.src = `https://besticon-demo.herokuapp.com/icon?size=32..48..80&url=${this.meta.link}`
+
+    const a = e('a.flex.items-center',
+      img,
+      e('.truncate.w-full',
+        e('h1.font-bold.font-lg.text-gray-800', this.data.title),
+        e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString())
+      )
+    )
+
+    a.href = this.data.link
+
     return e(`#${Random.Id}.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, 
-      e('h1.font-bold.font-lg.text-gray-800', this.data.title),
-      e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString()),
-      e('.content.text-gray-900', this.data.content)
+      a,
+      e('.content.text-gray-900.pt-4', this.data.content)
     )
   }
 
   serializer () {
-    const { data } = this
-    return { data }
+    const { data, meta } = this
+    return { data, meta }
   }
 
-  static deserialize ({ data }) {
-    return new this.constructor(data)
+  static deserialize ({ data, meta }) {
+    return new this.constructor(data, meta)
   }
 }
 
@@ -245,6 +262,9 @@ export class RSSFetcher {
    */
   async fetch (url) {
     const data = await parser.parseURL(url)
+
+    const meta = { ...data }
+    delete meta.items
     
     let FeedClass = RSSFeed
     for (const { regex, Feed } of this.store.feedTypes) {
@@ -254,6 +274,6 @@ export class RSSFetcher {
       }
     }
 
-    return data.items.map(item => new FeedClass(item))
+    return data.items.map(item => new FeedClass(item, meta))
   }
 }
