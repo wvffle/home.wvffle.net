@@ -13,29 +13,66 @@
       a:hover {
         text-decoration: underline;
       }
+
+      input {
+        background: url(https://duckduckgo.com/assets/icons/meta/DDG-iOS-icon_152x152.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: .75rem 0;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
   </head>
   <body class="bg-orange-400">
-    <div id="app" style="width: 666px" class="mx-auto"></div>
+    <div style="width: 666px" class="mx-auto">
+      <div class="m-10 bg-white rounded-lg shadow-lg overflow-hidden">
+        <input placeholder="Search on DuckDuckGo.com" autocomplete="off" class="bg-transparent pr-4 pl-24 py-6 block w-full">
+      </div>
+
+      <div id="app"> </div>
+    </div>
     <script async type="module">
-      import { Renderer, Store, RSSFetcher } from './index.js'
+      import { Renderer, Store, RSSFetcher, q } from './index.js'
+
+      const input = q('input')
+
+      input.addEventListener('keyup', ({ key }) => {
+        if (key === 'Enter') {
+          window.location.href = `https://duckduckgo.com/?q=${encodeURIComponent(input.value)}`
+        }
+      })
+
+      input.focus()
 
       const renderer = new Renderer()
       const store = new Store()
       const fetcher = new RSSFetcher(store)
 
+      window.store = store
+
       const FEED_URLS = [
         'https://blog.cloudflare.com/rss/',
-        'https://css-tricks.com/feed/',
-        'https://www.archlinux.org/feeds/planet/',
-        'https://www.xkcd.com/rss.xml',
-        'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
-        'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
+        // 'https://css-tricks.com/feed/',
+        // 'https://www.archlinux.org/feeds/planet/',
+        // 'https://www.xkcd.com/rss.xml',
+        // 'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
+        // 'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
       ]
 
       Promise.resolve().then(async () => {
-        const feeds = await Promise.all(FEED_URLS.map(url => fetcher.fetch(url)))
+        let feeds = store.feeds
+
+        if (feeds) {
+          for (const feed of feeds) {
+            renderer.add(...feed)
+          }
+
+          renderer.render()
+        }
+        
+        store.feeds = feeds = await Promise.all(FEED_URLS.map(url => fetcher.fetch(url)))
+
+        renderer.clear()
         for (const feed of feeds) {
           renderer.add(...feed)
         }
