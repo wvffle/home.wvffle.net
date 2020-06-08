@@ -3,7 +3,8 @@
     <meta charset="utf-8">
     <title>rss :wq</title>
 
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@1.4.6/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
       a {
         color: #f6ad55;
@@ -14,73 +15,199 @@
         text-decoration: underline;
       }
 
-      input {
+      input#search {
         background: url(https://duckduckgo.com/assets/icons/meta/DDG-iOS-icon_152x152.png);
         background-size: contain;
         background-repeat: no-repeat;
         background-position: .75rem 0;
       }
+
+      #overlay {
+        transform: translateY(-2rem);
+        opacity: 0;
+        pointer-events: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 10;
+        background: #0003;
+        transition: all 1s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #overlay.open {
+        transform: translateZ(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
     </style>
+
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
   </head>
   <body class="bg-orange-400">
+    <div id="overlay"></div>
+    <div class="fixed right-0 top-0">
+      <i id="settings_btn" class="material-icons text-orange-600 p-4 cursor-pointer hover:text-white">settings</i>
+    </div>
     <div style="width: 666px" class="mx-auto">
       <div class="m-10 bg-white rounded-lg shadow-lg overflow-hidden">
-        <input placeholder="Search on DuckDuckGo.com" autocomplete="off" class="bg-transparent pr-4 pl-24 py-6 block w-full">
+        <input id="search" placeholder="Search on DuckDuckGo.com" autocomplete="off" class="bg-transparent pr-4 pl-24 py-6 block w-full">
       </div>
 
-      <div id="app"> </div>
+      <div id="app"></div>
     </div>
-    <script async type="module">
-      import { Renderer, Store, RSSFetcher, Serializer, Serializable, q } from './index.js'
 
+    <script async type="module">
+      import { Renderer, Store, RSSFetcher, q, e } from './index.js'
+
+      // Search input
       const input = q('input')
 
+      input.focus()
       input.addEventListener('keyup', ({ key }) => {
         if (key === 'Enter') {
           window.location.href = `https://duckduckgo.com/?q=${encodeURIComponent(input.value)}`
         }
       })
 
-      input.focus()
-
+      // Feeds
       const renderer = new Renderer()
       const store = new Store()
       const fetcher = new RSSFetcher(store)
 
-      window.store = store
-      window.Serializer = Serializer
+      if (!store.feeds) {
+        store.feeds = {}
+      }
 
-      const FEED_URLS = [
-        'https://blog.cloudflare.com/rss/',
-        'https://css-tricks.com/feed/',
-        'https://www.archlinux.org/feeds/planet/',
-        'https://www.xkcd.com/rss.xml',
-        'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
-        'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
-      ]
+      if (!store.feedUrls) {
+        store.feedUrls = []
+      }
 
-      Promise.resolve().then(async () => {
-        let feeds = store.feeds
-
-        if (feeds) {
-          for (const feed of feeds) {
-            renderer.add(...feed)
-          }
-
-          renderer.render()
-        }
+      const renderFeed = async () => {
+        console.log('Rendering feeds!')
         
-        store.feeds = feeds = await Promise.all(FEED_URLS.map(url => fetcher.fetch(url)))
-
-        renderer.clear()
-        for (const feed of feeds) {
-          renderer.add(...feed)
+        // Read local cache
+        for (const url of store.feedUrls) {
+          const key = url.replace(/\./g, '_')
+          if (key in store.feeds) {
+            renderer.add(...store.feeds[key])
+          }
         }
 
         renderer.render()
+        
+        // Fetch new entries
+        await Promise.all(store.feedUrls.map(async url => {
+          store.$set('feeds', url.replace(/\./g, '_'), await fetcher.fetch(url))
+        }))
+
+        renderer.clear()
+        for (const url of store.feedUrls) {
+          const key = url.replace(/\./g, '_')
+          if (key in store.feeds) {
+            renderer.add(...store.feeds[key])
+          }
+        }
+
+        renderer.render()
+      }
+
+      renderFeed()
+
+      // Settings
+      const settingsBtn = q('#settings_btn')
+      const overlay = q('#overlay')
+
+      overlay.addEventListener('click', event => {
+        if (event.target !== overlay) {
+          return
+        }
+
+        overlay.classList.remove('open')
       })
 
+      settingsBtn.addEventListener('click', () => {
+        overlay.classList.add('open')
+
+        const render = urls => {
+          renderFeed()
+
+          const items = urls.map((url, i) => {
+            const apply = e('.bg-green-400.text-white.justify-center.items-center.cursor-pointer', e('i.material-icons', 'done'))
+            apply.style.height = apply.style.width = '3.5rem'
+            apply.style.display = 'none'
+
+            apply.addEventListener('click', () => {
+              apply.style.display = 'none'
+              url = input.value
+              store.$set('feedUrls', i, url)
+            })
+
+            const remove = e('.bg-red-400.text-white.justify-center.items-center.cursor-pointer.flex', e('i.material-icons', 'delete'))
+            remove.style.height = remove.style.width = '3.5rem'
+
+            remove.addEventListener('click', () => {
+              store.feedUrls.splice(i, 1)
+              render(store.feedUrls)
+            })
+
+            const input = e('input.text-gray-700.p-4.w-full', url)
+            input.value = url
+            input.addEventListener('keyup', ({ key }) => {
+              apply.style.display = input.value !== url
+                ? 'flex'
+                : 'none'
+
+              if (key === 'Enter' && apply.style.display === 'flex') {
+                apply.click()
+              }
+            })
+
+            store.$set('feedUrls', i, input.value)
+
+            return e('.flex.border-b.border-gray-100', input, e('.flex', apply, remove))
+          })
+
+          const input = e('input.w-full.p-4')
+          input.placeholder = 'https://rss.wvffle.net'
+
+          input.addEventListener('keyup', ({ key }) => {
+            if (key === 'Enter') {
+              add.click()
+            }
+          })
+
+          const add = e('.bg-orange-400.text-white.justify-center.items-center.cursor-pointer.flex.flex-shrink-0', e('i.material-icons', 'add'))
+          add.style.height = add.style.width = '3.5rem'
+
+          add.addEventListener('click', () => {
+            store.$set('feedUrls', urls.length, input.value)
+            render(store.feedUrls)
+          })
+
+          const container = e('.bg-white.rounded-lg.shadow-lg', 
+            e('h1.text-xl.text-gray-800.px-6.py-3', 'Settings'),
+            e('hr'),
+            e('.px-6.py-3',
+              e('h2.text.text-gray-800.pb-3', 'Feed URLs'),
+              ...items,
+              e('.border-b.border-orange-400.flex', 
+                input,
+                add
+              )
+            ),
+          )
+
+          container.style.width = '700px'
+
+          overlay.innerHTML = ''
+          overlay.appendChild(container)
+        }
+
+        render(store.feedUrls)
+      })
     </script>
   </body>
 </html>
