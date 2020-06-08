@@ -1,5 +1,6 @@
 import set from 'lodash.set'
 import PriorityQueue from 'fastpriorityqueue'
+import sanitize from 'sanitize-html'
 
 /**
  * @constant {Number} RSS Feed fetch interval in ms
@@ -18,7 +19,7 @@ export const ps = s => {
     classes = ''
   ] = s.match(/^([a-z][a-z-0-9]*)?(?:#([a-z][a-z-0-9]*))?(?:\.([a-z][a-z-0-9\.]*))?$/)
 
-  return { tag, id, className: classes.replace(/\./g, '') }
+  return { tag, id, className: classes.replace(/\./g, ' ') }
 }
 
 export const e = (s, ...c) => {
@@ -37,10 +38,18 @@ export const e = (s, ...c) => {
       continue
     }
 
-    el.appendChild(child instanceof HTMLElement 
-      ? child 
-      : document.createTextNode(child.toString())
-    )
+    if (child instanceof HTMLElement) {
+      el.appendChild(child)
+      continue
+    }
+
+    const html = sanitize(child.toString(), {
+      allowedTags: ['a', 'b', 'i', 'em', 'strong'],
+      allowedAttributes: { a: ['href'] }
+    })
+
+    const xml = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/xml')
+    el.appendChild(xml.children[0])
   }
 
   return el
@@ -199,10 +208,10 @@ export class RSSFeed extends Serializable {
   }
 
   render () {
-    return e(`#${Random.Id}.feed`, 
-      e('h1', this.data.title),
-      e('.text-gray-500', this.date.toLocaleString()),
-      e('.content', this.data.content)
+    return e(`#${Random.Id}.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, 
+      e('h1.font-bold.font-lg.text-gray-800', this.data.title),
+      e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString()),
+      e('.content.text-gray-900', this.data.content)
     )
   }
 

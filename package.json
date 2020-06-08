@@ -11,7 +11,8 @@
     "lodash.set": "^4.3.2",
     "lodash.sortby": "^4.7.0",
     "mime": "^2.4.6",
-    "rss-parser": "^3.8.0"
+    "rss-parser": "^3.8.0",
+    "sanitize-html": "^1.26.0"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
