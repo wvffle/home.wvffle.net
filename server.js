@@ -1,4 +1,6 @@
 const fastify = require('fastify')()
+const mime = require('mime')
+
 const { promises: fs, constants: { R_OK } } = require('fs')
 
 fastify.get('/', async (request, reply) => {
@@ -7,7 +9,7 @@ fastify.get('/', async (request, reply) => {
 })
 
 fastify.get('/:file', async ({ req: { originalUrl } }, reply) => {
-  reply.type(originalUrl.slice(originalUrl.lastIndexOf('.')))
+  reply.type(mime.getType(originalUrl.slice(originalUrl.lastIndexOf('.'))))
   return fs.readFile(`public${originalUrl}`)
 })
 

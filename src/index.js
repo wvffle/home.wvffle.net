@@ -1,4 +1,5 @@
 import set from 'lodash.set'
+import PriorityQueue from 'fastpriorityqueue'
 
 /**
  * @constant {Number} RSS Feed fetch interval in ms
@@ -15,7 +16,7 @@ export const ps = s => {
     tag = 'div', 
     id, 
     classes = ''
-  ] = s.match(/^([a-z-]+)?(?:#([a-z][a-z-0-9]+))?(?:\.([a-z][a-z-0-9\.]+))?$/)
+  ] = s.match(/^([a-z][a-z-0-9]*)?(?:#([a-z][a-z-0-9]*))?(?:\.([a-z][a-z-0-9\.]*))?$/)
 
   return { tag, id, className: classes.replace(/\./g, '') }
 }
@@ -24,16 +25,22 @@ export const e = (s, ...c) => {
   const { tag, id, className } = ps(s)
 
   const el = document.createElement(tag)
-  el.id = id
+
+  if (id) {
+    el.id = id
+  }
+
   el.className = className
 
   for (const child of c) {
-    if (c instanceof HTMLElement) {
-      el.appendChild(c)
+    if (child === undefined) {
       continue
     }
 
-    el.appendChild(document.createTextNode(c))
+    el.appendChild(child instanceof HTMLElement 
+      ? child 
+      : document.createTextNode(child.toString())
+    )
   }
 
   return el
@@ -64,17 +71,26 @@ export class Random {
 
 
 export class Renderer {
+  #items = new PriorityQueue((a, b) => a.date > b.date)
+
   constructor (rootSelector = '#app') {
     this.root = q(rootSelector)
   }
 
-  add (el) {
-    this.root.appendChild(el)
-    this.render()
+  add (...items) {
+    for (const item of items) {
+      this.#items.add(item)
+    }
   }
 
   render () {
-    
+    for (const el of this.root.children) {
+      el.remove()
+    }
+
+    this.#items.forEach(item => {
+      this.root.appendChild(item.render())
+    })
   }
 }
 
@@ -175,22 +191,28 @@ export class Store {
 }
 
 export class RSSFeed extends Serializable {
-  constructor () {
+  constructor (data) {
     super()
 
-    this.el = e(`#${Random.Id}.feed`)
+    this.data = data
+    this.date = new Date(data.pubDate)
   }
 
-  render (data) {
-    return this.el
+  render () {
+    return e(`#${Random.Id}.feed`, 
+      e('h1', this.data.title),
+      e('.text-gray-500', this.date.toLocaleString()),
+      e('.content', this.data.content)
+    )
   }
 
   serializer () {
-    return {}
+    const { data } = this
+    return { data }
   }
 
-  static deserialize () {
-    return new this.constructor()
+  static deserialize ({ data }) {
+    return new this.constructor(data)
   }
 }
 
@@ -203,9 +225,9 @@ export class RSSFetcher {
     this.store = store
   }
 
-  addFeed (regex, feed) {
+  addFeed (regex, Feed) {
     this.store.$set('feedTypes', store.feedTypes.length, { 
-      regex, feed 
+      regex, Feed
     })
   }
 
@@ -215,17 +237,14 @@ export class RSSFetcher {
   async fetch (url) {
     const data = await parser.parseURL(url)
     
-    let feedInstance
-    for (const { regex, feed } of this.store.feedTypes) {
+    let FeedClass = RSSFeed
+    for (const { regex, Feed } of this.store.feedTypes) {
       if (regex.test(url)) {
-        feedInstance = feed
+        FeedClass = Feed
+        break
       }
     }
 
-    if (feedInstance === undefined) {
-      feedInstance = new RSSFeed()
-    }
-
-    return feedInstance.render(data)
+    return data.items.map(item => new FeedClass(item))
   }
 }

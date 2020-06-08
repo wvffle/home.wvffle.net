@@ -5,20 +5,30 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src="index.js"></script>
-    <script>
-      const { Renderer, Store, RSSFetcher } = core
+    <script async type="module">
+      import { Renderer, Store, RSSFetcher } from './index.js'
 
       const renderer = new Renderer()
       const store = new Store()
       const fetcher = new RSSFetcher(store)
 
-      ;(async () => {
-        const feedUrl = 'https://blog.cloudflare.com/rss/'
-        const feed = await fetcher.fetch(feedUrl)
-        console.log(feed)
-        renderer.add(feed)
-      })()
+      const FEED_URLS = [
+        'https://blog.cloudflare.com/rss/',
+        'https://css-tricks.com/feed/',
+        'https://www.archlinux.org/feeds/planet/',
+        'https://www.xkcd.com/rss.xml',
+        'https://www.youtube.com/feeds/videos.xml?channel_id=UCRUq9jueekA0t4uz_z5LZmA',
+        'https://www.youtube.com/feeds/videos.xml?channel_id=UC_1U2qs9zaBrO4_zvvFf2BQ'
+      ]
+
+      Promise.resolve().then(async () => {
+        const feeds = await Promise.all(FEED_URLS.map(url => fetcher.fetch(url)))
+        for (const feed of feeds) {
+          renderer.add(...feed)
+        }
+
+        renderer.render()
+      })
 
     </script>
   </body>
