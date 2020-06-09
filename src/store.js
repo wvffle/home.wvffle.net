@@ -31,32 +31,53 @@ Serializer.register(Value)
  */
 export class Store {
   constructor () {
-    const $cache = {}
+    this.$cache = {}
 
     // NOTE: Yeah, javascript pretty much allows to return from a constructor.
     //       I've done some crazy stuff with that in the past.
     return new Proxy(this, {
       get (target, prop) {
-        if (prop[0] === '$') {
-          return target[prop]
-        }
-
-        if (prop in $cache) {
-          return $cache[prop]
-        }
-
-        const stored = localStorage[prop]
-        if (stored) {
-          return Serializer.parse(stored)
-        }
-
-        return undefined
+        return target._get(target, prop)
       },
 
       set (target, prop, value) {
-        return localStorage[prop] = Serializer.stringify(new Value($cache[prop] = value))
+        return target._set(target, prop, value)
       }
     })
+  }
+
+  /**
+   * Property getter
+   */
+  _get (target, prop) {
+    if (prop[0] === '$') {
+      return target[prop]
+    }
+
+    if (prop in this.$cache) {
+      return this.$cache[prop]
+    }
+
+    const stored = localStorage[prop]
+    if (stored) {
+      return Serializer.parse(stored)
+    }
+
+    return undefined
+  }
+
+  /**
+   * Property setter
+   */
+  _set (target, prop, value) {
+    if (value === undefined) {
+      delete localStorage[prop]
+      delete this.$cache[prop]
+      return true
+    }
+
+    localStorage[prop] = Serializer.stringify(new Value(this.$cache[prop] = value))
+    return value
   }
 
   /**
@@ -66,6 +87,9 @@ export class Store {
     this[key] = this[key]
   }
 
+  /**
+   * Method called to update Object data
+   */
   $set (key, index, value) {
     set(this[key], index, value)
     this.$update(key)

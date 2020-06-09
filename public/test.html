@@ -1,0 +1,26 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
+    <link href="https://unpkg.com/mocha@4.0.1/mocha.css" rel="stylesheet" />
+</head>
+<body>
+<div id="mocha"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chai@4.1.2/chai.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mocha@4.0.1/mocha.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
+
+<script>mocha.setup('bdd')</script>
+<script type="module" src="test/serializer.js"></script>
+<script type="module" src="test/store.js"></script>
+<script type="module" src="test/rss-fetcher.js"></script>
+<script type="module" src="test/waff-query.js"></script>
+
+<script type="module">
+    mocha.checkLeaks();
+    mocha.globals(['__VUE_DEVTOOLS_TOAST__'])
+    mocha.run();
+</script>
+</body>
+</html>

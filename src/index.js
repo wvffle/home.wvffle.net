@@ -26,6 +26,10 @@ export class Renderer {
   }
 }
 
+// NOTE: Export everything to allow testing
 export * from './store'
 export * from './rss/fetcher'
+export * from './rss/feed'
+export * from './rss/parser'
 export * from './waff-query'
+export * from './serializer'

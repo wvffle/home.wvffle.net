@@ -2,18 +2,13 @@ import { RSSFeed } from './feed'
 import { parser } from './parser'
 
 export class RSSFetcher {
-  constructor (store) {
-    if (!store.feedTypes) {
-      store.feedTypes = []
-    }
+  #feedTypes = new Map()
 
-    this.store = store
-  }
-
-  addFeed (regex, Feed) {
-    this.store.$set('feedTypes', store.feedTypes.length, { 
-      regex, Feed
-    })
+  /**
+   * Add feed type
+   */
+  addFeed (regex, FeedClass) {
+    this.#feedTypes.set(regex, FeedClass)
   }
 
   /**
@@ -26,7 +21,7 @@ export class RSSFetcher {
     delete meta.items
     
     let FeedClass = RSSFeed
-    for (const { regex, Feed } of this.store.feedTypes) {
+    for (const [regex, Feed] of this.#feedTypes) {
       if (regex.test(url)) {
         FeedClass = Feed
         break

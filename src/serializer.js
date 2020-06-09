@@ -51,6 +51,10 @@ export class Serializer {
     }
 
     if (data instanceof Serializable) {
+      if (data.constructor.name === 'Serializable') {
+        return new Error('Cannot stringify plain Serializable. Extend this clas.')
+      }
+
       return `{"$type":"Serializable","$class":"${data.constructor.name}","$value":${Serializer.stringify(data.serialize())}}`
     }
 
@@ -60,6 +64,10 @@ export class Serializer {
 
     if (typeof data === 'string') {
       return `"${data.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
+    }
+
+    if (data instanceof Date) {
+      return `{"$type":"${data.constructor.name}","$value":${+data}}`
     }
 
     return `{"$type":"${data.constructor.name}","$value":"${data}"}`
@@ -101,6 +109,11 @@ export class Serializer {
       }
 
       const Class = window[data.$type]
+
+      if (Class === Date) {
+        return new Date(data.$value)
+      }
+
       return 'parse' in Class
         ? Class.parse(data.$value)
         : Class(data.$value)

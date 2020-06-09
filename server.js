@@ -8,9 +8,18 @@ fastify.get('/', async (request, reply) => {
   return fs.readFile('public/index.html')
 })
 
-fastify.get('/:file', async ({ req: { originalUrl } }, reply) => {
-  reply.type(mime.getType(originalUrl.slice(originalUrl.lastIndexOf('.'))))
-  return fs.readFile(`public${originalUrl}`)
+fastify.get('/test/*', async ({ req: { originalUrl } }, reply) => {
+  const queryIndex = originalUrl.indexOf('?')
+  const file = originalUrl.slice(0, queryIndex === -1 ? Infinity : queryIndex)
+  reply.type(mime.getType(file.slice(file.lastIndexOf('.'))))
+  return fs.readFile(file.slice(1))
+})
+
+fastify.get('/*', async ({ req: { originalUrl } }, reply) => {
+  const queryIndex = originalUrl.indexOf('?')
+  const file = originalUrl.slice(0, queryIndex === -1 ? Infinity : queryIndex)
+  reply.type(mime.getType(file.slice(file.lastIndexOf('.'))))
+  return fs.readFile(`public${file}`)
 })
 
 

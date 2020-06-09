@@ -5,7 +5,7 @@ export const q = s => document.querySelector(s)
 export const qq = s => [...document.querySelectorAll(s)]
 
 // NOTE: See https://github.com/wvffle/waff-query/blob/master/lib/util/selector.js for fast selector parser
-export const ps = s => {
+export const ps = (s = '') => {
   const [, 
     tag = 'div', 
     id, 
