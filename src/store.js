@@ -77,7 +77,7 @@ export class Store {
     }
 
     localStorage[prop] = Serializer.stringify(new Value(this.$cache[prop] = value))
-    return value
+    return value || true
   }
 
   /**

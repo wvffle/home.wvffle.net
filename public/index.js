@@ -5444,7 +5444,7 @@ return new Proxy(this,{get(target,prop){return target._get(target,prop);},set(ta
    * Property getter
    */_get(target,prop){if(prop[0]==='$'){return target[prop];}if(prop in this.$cache){return this.$cache[prop];}const stored=localStorage[prop];if(stored){return Serializer.parse(stored);}return undefined;}/**
    * Property setter
-   */_set(target,prop,value){if(value===undefined){delete localStorage[prop];delete this.$cache[prop];return true;}localStorage[prop]=Serializer.stringify(new Value(this.$cache[prop]=value));return value;}/**
+   */_set(target,prop,value){if(value===undefined){delete localStorage[prop];delete this.$cache[prop];return true;}localStorage[prop]=Serializer.stringify(new Value(this.$cache[prop]=value));return value||true;}/**
    * Method called when non-primitive values is updated
    */$update(key){this[key]=this[key];}/**
    * Method called to update Object data
