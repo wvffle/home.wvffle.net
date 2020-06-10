@@ -63,7 +63,7 @@ export class Serializer {
     }
 
     if (typeof data === 'string') {
-      return `"${data.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
+      return `"${data.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\t/g, '\\t').replace(/\n/g, '\\n')}"`
     }
 
     if (data instanceof Date) {

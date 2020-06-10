@@ -36,8 +36,8 @@ export const e = (s, ...c) => {
     }
 
     const html = sanitize(child.toString(), {
-      allowedTags: ['a', 'img'],
-      allowedAttributes: { a: ['href'], img: ['src'] }
+      allowedTags: ['a', 'img', 'pre', 'code'],
+      allowedAttributes: { a: ['href'], img: ['src'], pre: ['rel'] }
     })
 
     const xml = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html')

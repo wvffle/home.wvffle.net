@@ -4,6 +4,8 @@
     <title>Your RSS Feed | :wq</title>
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@1.4.6/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.0.3/build/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.0.3/build/styles/atom-one-light.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
       a {
@@ -47,9 +49,19 @@
         width: 100%;
         height: auto;
       }
+
+      pre {
+        overflow-x: auto;
+        border-radius: .5rem;
+        background: #fafafa;
+        font-size: .75rem;
+        margin: .5rem 0;
+        padding: .5rem;
+      }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/rss-parser@3.8.0/dist/rss-parser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.0.3/build/highlight.min.js"></script>
   </head>
   <body class="bg-orange-400">
     <div id="overlay"></div>
@@ -65,7 +77,7 @@
     </div>
 
     <script async type="module">
-      import { Renderer, Store, RSSFetcher, q, e } from './index.js'
+      import { Renderer, Store, RSSFetcher, q, qq, e } from './index.js'
 
       // Search input
       const input = q('input')
@@ -89,20 +101,20 @@
       if (!store.feedUrls) {
         store.feedUrls = ['https://www.xkcd.com/rss.xml']
       }
+        
+      // Read local cache
+      for (const url of store.feedUrls) {
+        const key = url.replace(/\./g, '_')
+
+        if (key in store.feeds) {
+          renderer.add(...store.feeds[key])
+        }
+      }
+
+      renderer.render()
 
       const renderFeed = async () => {
         console.log('Rendering feeds!')
-        
-        // Read local cache
-        for (const url of store.feedUrls) {
-          const key = url.replace(/\./g, '_')
-
-          if (key in store.feeds) {
-            renderer.add(...store.feeds[key])
-          }
-        }
-
-        renderer.render()
         
         // Fetch new entries
         await Promise.all(store.feedUrls.map(async url => {
@@ -118,6 +130,14 @@
         }
 
         renderer.render()
+
+        const codes = qq('pre[rel] code')
+        for (const code of codes) {
+          const pre = code.parentElement
+          const { value } = hljs.highlight(pre.attributes.rel.value.toLowerCase(), code.innerHTML)
+          console.log(value)
+          code.innerHTML = value.replace(/&amp;nbsp;/g, '&nbsp;')
+        }
       }
 
       renderFeed()
