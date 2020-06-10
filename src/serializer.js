@@ -1,6 +1,9 @@
+import { Interface } from './util/interface'
+
 /**
  * Class responsible for serialization/deserialization
  */
+@Interface
 export class Serializable {
   /**
    * Method used to serialize instance into JSON compatible object

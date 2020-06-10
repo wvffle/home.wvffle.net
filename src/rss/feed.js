@@ -1,7 +1,9 @@
 import { Serializable, Serializer } from '../serializer'
+import { implement } from '../util/interface'
 import { e } from '../waff-query'
 
-export class RSSFeed extends Serializable {
+@implement(Serializable)
+export class RSSFeed {
   constructor (data, meta) {
     super() 
 

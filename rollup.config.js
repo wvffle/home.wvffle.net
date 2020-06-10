@@ -12,10 +12,16 @@ export default [{
     name: 'core'
   },
   plugins: [
-    babel({ 
-      plugins: ['@babel/plugin-proposal-class-properties']
-    }),
     resolve(),
+    babel({ 
+      presets: [
+        '@babel/preset-stage-2'
+      ],
+      plugins: [
+        '@babel/plugin-proposal-class-properties', 
+        '@babel/plugin-proposal-decorators'
+      ]
+    }),
     commonjs(),
   ]
 }]

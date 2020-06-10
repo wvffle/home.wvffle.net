@@ -24,6 +24,6 @@ fastify.get('/*', async ({ req: { originalUrl } }, reply) => {
 
 
 fastify.listen({
-  port: 8081,
+  port: process.env.PORT || 8081,
   host: '0.0.0.0'
 })

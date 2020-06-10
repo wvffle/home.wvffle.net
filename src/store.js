@@ -1,7 +1,9 @@
 import { Serializable, Serializer } from './serializer'
+import { implement } from './util/interface'
 import set from 'lodash.set'
 
-export class Value extends Serializable {
+@implement(Serializable)
+export class Value {
   constructor (value) {
     super()
     this.value = value
