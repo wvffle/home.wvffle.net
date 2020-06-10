@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.0.3/build/styles/atom-one-light.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+      * {
+        outline: none !important;
+        transition: all .25s ease;
+      }
+
       a {
         color: #f6ad55;
         cursor: pointer;
@@ -153,6 +158,7 @@
       const feedBtn = q('#feed_btn')
       const cssBtn = q('#css_btn')
       const overlay = q('#overlay')
+      const body = q('body')
 
       overlay.addEventListener('click', event => {
         if (event.target !== overlay) {
@@ -242,13 +248,57 @@
         render(store.feedUrls)
       })
 
+      // Background color
+      if (!store.bg) {
+        store.bg = 'bg-orange-400'
+      }
+
+      const accent = (color) => {
+        return 'text' + color.slice(2, -3) + (+color.slice(-3) + 200)
+      }
+      
+      for (const i of qq(`i.${accent(body.className)}`)) {
+        i.classList.remove(accent(body.className))
+        i.classList.add(accent(store.bg))
+      }
+      body.className = store.bg
+
       colorBtn.addEventListener('click', () => {
         overlay.classList.add('open')
+
+        const colors = [
+          'red', 'orange', 'yellow', 
+          'green', 'teal', 'blue', 
+          'indigo', 'purple', 'pink'
+        ]
+          .reduce((populated, color) => {
+            for (const i of [3, 4, 5, 6, 7]) {
+              populated.push(`bg-${color}-${i * 100}`)
+            }
+
+            return populated
+          }, [])
+          .map(className => {
+            const btn = e(`.rounded.h-6.w-6.mr-2.mb-2.cursor-pointer.${className}`)
+            btn.dataset.color = className
+
+            btn.addEventListener('click', () => {
+              for (const i of qq(`i.${accent(store.bg)}`)) {
+                i.classList.remove(accent(store.bg))
+                i.classList.add(accent(btn.dataset.color))
+              }
+
+              store.bg = body.className = btn.dataset.color
+            })
+
+            return btn
+          })
 
         const container = e('.bg-white.rounded-lg.shadow-lg', 
           e('h1.text-xl.text-gray-800.px-6.py-3', 'Background color'),
           e('hr'),
-          e('.px-6.py-3.mb-3',
+          e('.px-6.py-3.mb-3.flex.flex-wrap',
+            ...colors
           ),
         )
 
