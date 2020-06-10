@@ -70,7 +70,7 @@
     </div>
     <div style="width: 666px" class="mx-auto">
       <div class="m-10 bg-white rounded-lg shadow-lg overflow-hidden">
-        <input id="search" placeholder="Search on DuckDuckGo.com" autocomplete="off" class="bg-transparent pr-4 pl-24 py-6 block w-full">
+        <input autofocus id="search" placeholder="Search on DuckDuckGo.com" autocomplete="off" class="bg-transparent pr-4 pl-24 py-6 block w-full">
       </div>
 
       <div id="app"></div>
@@ -81,8 +81,6 @@
 
       // Search input
       const input = q('input')
-
-      input.focus()
       input.addEventListener('keyup', ({ key }) => {
         if (key === 'Enter') {
           window.location.href = `https://duckduckgo.com/?q=${encodeURIComponent(input.value)}`
