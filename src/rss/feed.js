@@ -2,11 +2,9 @@ import { Serializable, Serializer } from '../serializer'
 import { implement } from '../util/interface'
 import { e } from '../waff-query'
 
-@implement(Serializable)
-export class RSSFeed {
-  constructor (data, meta) {
-    super() 
 
+export @implement(Serializable) class RSSFeed {
+  constructor (data, meta) {
     this.data = data
     this.meta = meta
     this.date = new Date(data.pubDate)

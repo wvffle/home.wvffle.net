@@ -1,10 +1,9 @@
-import { Interface } from './util/interface'
+import { Interface, isImplementing } from './util/interface'
 
 /**
  * Class responsible for serialization/deserialization
  */
-@Interface
-export class Serializable {
+export @Interface class Serializable {
   /**
    * Method used to serialize instance into JSON compatible object
    * @abstract
@@ -53,7 +52,7 @@ export class Serializer {
       return `{${value}}`
     }
 
-    if (data instanceof Serializable) {
+    if (isImplementing(data.constructor, Serializable)) {
       if (data.constructor.name === 'Serializable') {
         return new Error('Cannot stringify plain Serializable. Extend this clas.')
       }
@@ -117,6 +116,7 @@ export class Serializer {
         return new Date(data.$value)
       }
 
+      console.log(data)
       return 'parse' in Class
         ? Class.parse(data.$value)
         : Class(data.$value)
