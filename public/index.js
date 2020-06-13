@@ -6955,6 +6955,8 @@ class RSSFetcher {
    * Add feed type
    */
   addFeed(regex, FeedClass) {
+    Serializer.register(FeedClass);
+
     _classPrivateFieldGet(this, _feedTypes).set(regex, FeedClass);
   }
   /**

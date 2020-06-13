@@ -1,5 +1,6 @@
 import { RSSFeed } from './feed'
 import { parser } from './parser'
+import { Serializer } from '../serializer'
 
 export class RSSFetcher {
   #feedTypes = new Map()
@@ -8,6 +9,7 @@ export class RSSFetcher {
    * Add feed type
    */
   addFeed (regex, FeedClass) {
+    Serializer.register(FeedClass)
     this.#feedTypes.set(regex, FeedClass)
   }
 
