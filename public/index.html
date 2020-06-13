@@ -128,18 +128,19 @@
       const renderFeed = async () => {
         console.log('Rendering feeds!')
         
+        renderer.clear()
+
+        // Remove old entries
+        store.feeds = {}
+
         // Fetch new entries
         await Promise.all(store.feedUrls.map(async url => {
-          store.$set('feeds', url.replace(/\./g, '_'), await fetcher.fetch(url))
-        }))
-
-        renderer.clear()
-        for (const url of store.feedUrls) {
+          const feeds = await fetcher.fetch(url)
           const key = url.replace(/\./g, '_')
-          if (key in store.feeds) {
-            renderer.add(...store.feeds[key])
-          }
-        }
+
+          store.$set('feeds', key, feeds)
+          renderer.add(...feeds)
+        }))
 
         renderer.render()
 

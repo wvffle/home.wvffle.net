@@ -40,6 +40,16 @@ describe('Store', () => {
       store.$set('test', 1, 666)
       chai.expect(store.test[1]).to.equal(666)
     })
+
+    it('should change object prop', () => {
+      const store = new Store()
+      store.test = { }
+
+      store.$set('test', 'a', 6)
+      chai.expect(store.test.a).to.equal(6)
+      store.$set('test', 'a', 666)
+      chai.expect(store.test.a).to.equal(666)
+    })
   })
 
   describe('MemoryStore', () => {
