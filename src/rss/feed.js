@@ -35,6 +35,13 @@ export @implement(Serializable) class RSSFeed {
   }
 
   /**
+   * Check if RSSFeed should be visible or not
+   */
+  get visible () {
+    return true
+  }
+
+  /**
    * @inheritdoc
    * @override
    */

@@ -6866,6 +6866,16 @@ let RSSFeed = _decorate([implement(Serializable)], function (_initialize) {
         return e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, a, e('.content.text-gray-900.pt-4', this.data.content));
       }
       /**
+       * Check if RSSFeed should be visible or not
+       */
+
+    }, {
+      kind: "get",
+      key: "visible",
+      value: function visible() {
+        return true;
+      }
+      /**
        * @inheritdoc
        * @override
        */
@@ -6976,8 +6986,10 @@ class Renderer {
   render() {
     this.root.innerHTML = '';
 
-    for (const item of [..._classPrivateFieldGet(this, _items)].sort((a, b) => b.date - a.date)) {
-      this.root.appendChild(item.render());
+    for (const feed of [..._classPrivateFieldGet(this, _items)].sort((a, b) => b.date - a.date)) {
+      if (feed.visible) {
+        this.root.appendChild(feed.render());
+      }
     }
   }
 

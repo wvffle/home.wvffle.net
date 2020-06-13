@@ -20,8 +20,10 @@ export class Renderer {
 
   render () {
     this.root.innerHTML = ''
-    for (const item of [...this.#items].sort((a, b) => b.date - a.date)) {
-      this.root.appendChild(item.render())
+    for (const feed of [...this.#items].sort((a, b) => b.date - a.date)) {
+      if (feed.visible) {
+        this.root.appendChild(feed.render())
+      }
     }
   }
 }
