@@ -91,7 +91,12 @@
 
     <div id="custom_css"></div>
     <script async type="module">
-      import { Renderer, Store, RSSFetcher, q, qq, e } from './index.js'
+      import { Renderer, Store, RSSFetcher, URLTransformer, q, qq, e } from './index.js'
+
+      // YouTube channel RSS
+      URLTransformer.register(/^https:\/\/(?:www\.)?youtube\.com\/channel\/(UC.+)$/, (url, id) => {
+        return `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`
+      })
 
       // Search input
       const input = q('input')

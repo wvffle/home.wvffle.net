@@ -6913,11 +6913,31 @@ let RSSFeed = _decorate([implement(Serializable)], function (_initialize) {
 });
 Serializer.register(RSSFeed);
 
-// NOTE: Overwriting parseURL method to automatically bypass CORS
+class URLTransformer {
+  static register(regex, transform) {
+    URLTransformer.transformers.set(regex, transform);
+  }
+
+  static transform(url) {
+    for (const [regex, transform] of URLTransformer.transformers) {
+      const matches = regex.exec(url);
+
+      if (matches && matches.length) {
+        return transform(...matches);
+      }
+    }
+
+    return url;
+  }
+
+}
+
+_defineProperty(URLTransformer, "transformers", new Map());
+
 RSSParser.prototype._parseURL = RSSParser.prototype.parseURL;
 
 RSSParser.prototype.parseURL = function (url) {
-  return this._parseURL(`https://cors-anywhere.herokuapp.com/${url}`);
+  return this._parseURL(`https://cors-anywhere.herokuapp.com/${URLTransformer.transform(url)}`);
 }; // RSS parser
 
 
@@ -6997,4 +7017,4 @@ class Renderer {
 
 var _items = new WeakMap();
 
-export { RSSFeed, RSSFetcher, Renderer, Serializable, Serializer, Store, Value, e, parser, ps, q, qq };
+export { RSSFeed, RSSFetcher, Renderer, Serializable, Serializer, Store, URLTransformer, Value, e, parser, ps, q, qq };
