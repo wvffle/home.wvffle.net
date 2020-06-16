@@ -113,19 +113,7 @@
       })
 
       class YoutubeFeed extends RSSFeed {
-        render () {
-          const img = e('img.h-8.w-8.flex-shrink-0.mr-4')
-          img.src = `https://besticon-demo.herokuapp.com/icon?size=32..48..80&url=${this.meta.link}`
-
-          const a = e('a.flex.items-center.mb-4',
-            img,
-            e('.truncate.w-full',
-              e('h1.font-bold.font-lg.text-gray-800', this.data.title),
-              e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString())
-            )
-          )
-
-          a.href = this.data.link
+        renderContent () {
           const iframe = e('iframe')
           iframe.frameborder = 0
           iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
@@ -134,10 +122,7 @@
           iframe.width = 538
           iframe.height = 538 * 9 / 16
 
-          return e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, 
-            a,
-            iframe
-          )
+          return iframe
         }
       }
 

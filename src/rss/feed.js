@@ -30,13 +30,17 @@ export @implement(Serializable) class RSSFeed {
 
     const res = e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, 
       a,
-      e('.content.text-gray-900.pt-4', this.data.content)
+      e('.content.text-gray-900.pt-4', this.renderContent())
     )
 
     // FIXME: Remove when https://github.com/MethodGrab/firefox-custom-new-tab-page/issues/1 is fixed
     for (const a of res.querySelectorAll('a')) {
       a.target = '_top'
     }
+  }
+
+  renderContent () {
+    return this.data.content
   }
 
   /**
