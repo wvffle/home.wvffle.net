@@ -6863,7 +6863,19 @@ let RSSFeed = _decorate([implement(Serializable)], function (_initialize) {
         img.src = `https://besticon-demo.herokuapp.com/icon?size=32..48..80&url=${this.meta.link}`;
         const a = e('a.flex.items-center', img, e('.truncate.w-full', e('h1.font-bold.font-lg.text-gray-800', this.data.title), e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString())));
         a.href = this.data.link;
-        return e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, a, e('.content.text-gray-900.pt-4', this.data.content));
+        const res = e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, a, e('.content.text-gray-900.pt-4', this.renderContent())); // FIXME: Remove when https://github.com/MethodGrab/firefox-custom-new-tab-page/issues/1 is fixed
+
+        for (const a of res.querySelectorAll('a')) {
+          a.target = '_top';
+        }
+
+        return res;
+      }
+    }, {
+      kind: "method",
+      key: "renderContent",
+      value: function renderContent() {
+        return this.data.content;
       }
       /**
        * Check if RSSFeed should be visible or not

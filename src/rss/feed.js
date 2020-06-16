@@ -37,6 +37,8 @@ export @implement(Serializable) class RSSFeed {
     for (const a of res.querySelectorAll('a')) {
       a.target = '_top'
     }
+
+    return res
   }
 
   renderContent () {
