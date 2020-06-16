@@ -80,6 +80,7 @@
       <i id="feed_btn" class="material-icons text-orange-600 p-4 cursor-pointer hover:text-white">rss_feed</i>
       <i id="color_btn" class="material-icons text-orange-600 p-4 cursor-pointer hover:text-white">palette</i>
       <i id="css_btn" class="material-icons text-orange-600 p-4 cursor-pointer hover:text-white">style</i>
+      <i id="gh_btn" class="material-icons text-orange-600 p-4 cursor-pointer hover:text-white">source</i>
     </div>
     <div style="width: 666px" class="mx-auto">
       <div class="m-10 bg-white rounded-lg shadow-lg overflow-hidden">
@@ -180,6 +181,7 @@
       const colorBtn = q('#color_btn')
       const feedBtn = q('#feed_btn')
       const cssBtn = q('#css_btn')
+      const ghBtn = q('#gh_btn')
       const overlay = q('#overlay')
       const body = q('body')
 
@@ -366,6 +368,13 @@
 
         overlay.innerHTML = ''
         overlay.appendChild(container)
+      })
+
+      ghBtn.addEventListener('click', () => {
+        const a = e('a')
+        a.href = 'https://github.com/wvffle/home.wvffle.net'
+        a.target = '_top'
+        a.click()
       })
     </script>
   </body>
