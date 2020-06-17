@@ -114,7 +114,13 @@
       })
 
       class YoutubeFeed extends RSSFeed {
-        renderContent () {
+        #iframe = null
+
+        get content () {
+          if (this.#iframe) {
+            return this.#iframe
+          }
+
           const iframe = e('iframe')
           iframe.frameborder = 0
           iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
@@ -123,7 +129,7 @@
           iframe.width = 538
           iframe.height = 538 * 9 / 16
 
-          return iframe
+          return (this.#iframe = iframe)
         }
       }
 
@@ -170,8 +176,9 @@
         const codes = qq('pre[rel] code')
         for (const code of codes) {
           const pre = code.parentElement
-          const { value } = hljs.highlight(pre.attributes.rel.value.toLowerCase(), code.innerHTML)
-          code.innerHTML = value.replace(/&amp;nbsp;/g, '&nbsp;')
+          const { value } = hljs.highlight(pre.attributes.rel.value.toLowerCase(), code.textContent)
+
+          code.innerHTML = value
         }
       }
 

@@ -23,7 +23,10 @@ export class RSSFetcher {
     delete meta.items
     
     let FeedClass = RSSFeed
+    console.log(this.#feedTypes)
+
     for (const [regex, Feed] of this.#feedTypes) {
+      console.log(regex, url, regex.test(url), Feed)
       if (regex.test(url)) {
         FeedClass = Feed
         break

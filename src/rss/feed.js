@@ -21,7 +21,7 @@ export @implement(Serializable) class RSSFeed {
     const a = e('a.flex.items-center',
       img,
       e('.truncate.w-full',
-        e('h1.font-bold.font-lg.text-gray-800', this.data.title),
+        e('h1.font-bold.font-lg.text-gray-800', this.title),
         e('.text-gray-700.text-xs.font-mono', this.date.toLocaleString())
       )
     )
@@ -30,7 +30,7 @@ export @implement(Serializable) class RSSFeed {
 
     const res = e(`.m-10.shadow-lg.rounded-lg.p-6.pt-4.bg-white`, 
       a,
-      e('.content.text-gray-900.pt-4', this.renderContent())
+      e('.content.text-gray-900.pt-4', this.content)
     )
 
     // FIXME: Remove when https://github.com/MethodGrab/firefox-custom-new-tab-page/issues/1 is fixed
@@ -41,8 +41,18 @@ export @implement(Serializable) class RSSFeed {
     return res
   }
 
-  renderContent () {
+  /**
+   * Rendered content
+   */
+  get content () {
     return this.data.content
+  }
+
+  /**
+   * Rendered title
+   */
+  get title () {
+    return this.data.title
   }
 
   /**

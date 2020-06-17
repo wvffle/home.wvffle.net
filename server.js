@@ -5,7 +5,7 @@ const { promises: fs, constants: { R_OK } } = require('fs')
 
 fastify.get('/', async (request, reply) => {
   reply.type('html')
-  return fs.readFile('public/index.html')
+  return fs.readFile(`${__dirname}/public/index.html`)
 })
 
 fastify.get('/test/*', async ({ req: { originalUrl } }, reply) => {
@@ -19,7 +19,7 @@ fastify.get('/*', async ({ req: { originalUrl } }, reply) => {
   const queryIndex = originalUrl.indexOf('?')
   const file = originalUrl.slice(0, queryIndex === -1 ? Infinity : queryIndex)
   reply.type(mime.getType(file.slice(file.lastIndexOf('.'))))
-  return fs.readFile(`public${file}`)
+  return fs.readFile(`${__dirname}/public${file}`)
 })
 
 
