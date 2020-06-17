@@ -107,7 +107,7 @@ export class Serializer {
 
       if (data.$type === 'Serializable') {
         const value = parse(data.$value)
-        return Serializer.cache[data.$class].deserialize(value)
+        return Serializer.cache[data.$class].deserialize(value, Serializer.cache[data.$class])
       }
 
       const Class = window[data.$type]

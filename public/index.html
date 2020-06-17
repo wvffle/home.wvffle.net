@@ -167,6 +167,7 @@
         store.feedUrls = ['https://www.xkcd.com/rss.xml']
       }
         
+        window.store = store
       // Read local cache
       for (const url of store.feedUrls) {
         const key = url.replace(/\./g, '_')

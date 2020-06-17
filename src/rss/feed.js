@@ -75,8 +75,8 @@ export @implement(Serializable) class RSSFeed {
    * @inheritdoc
    * @override
    */
-  static deserialize ({ data, meta }) {
-    return new RSSFeed(data, meta)
+  static deserialize ({ data, meta }, FeedClass) {
+    return new FeedClass(data, meta)
   }
 }
 

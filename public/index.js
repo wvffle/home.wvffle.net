@@ -5703,7 +5703,7 @@ class Serializer {
 
       if (data.$type === 'Serializable') {
         const value = parse(data.$value);
-        return Serializer.cache[data.$class].deserialize(value);
+        return Serializer.cache[data.$class].deserialize(value, Serializer.cache[data.$class]);
       }
 
       const Class = window[data.$type];
@@ -6931,8 +6931,8 @@ let RSSFeed = _decorate([implement(Serializable)], function (_initialize) {
       value: function deserialize({
         data,
         meta
-      }) {
-        return new RSSFeed(data, meta);
+      }, FeedClass) {
+        return new FeedClass(data, meta);
       }
     }]
   };
