@@ -36,7 +36,7 @@ export const e = (s, ...c) => {
     }
 
     const html = sanitize(child.toString(), {
-      allowedTags: ['a', 'img', 'pre', 'code'],
+      allowedTags: ['a', 'img', 'pre', 'code', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'],
       allowedAttributes: { a: ['href'], img: ['src'], pre: ['rel'] }
     })
 
