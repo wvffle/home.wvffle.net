@@ -13,6 +13,11 @@
         transition: all .25s ease;
       }
 
+      h1:not(:first-child), h2:not(:first-child), h3:not(:first-child),
+      h4:not(:first-child), h5:not(:first-child), h6:not(:first-child) {
+        margin-top: 1rem
+      }
+
       a {
         color: #f6ad55;
         cursor: pointer;
@@ -133,7 +138,26 @@
         }
       }
 
+      class GHReleaseFeed extends RSSFeed {
+        get title () {
+          const matches = /github.com\/([^/]+\/[^/]+)\/releases\/tag\/(.+)$/.exec(this.data.link)
+          return `[${matches[1]}] ${matches[2]}`
+        }
+
+        get content () {
+          const dom = e('', super.content)
+          
+          for (const ul of dom.querySelectorAll('ul')) {
+            ul.classList.add('text-xs', 'text-gray-700')
+            ul.style.listStyle = 'inside disc'
+          }
+
+          return dom
+        }
+      }
+
       fetcher.addFeed(ytRegex, YoutubeFeed)
+      fetcher.addFeed(/^https:\/\/github.com\/(?:[^/]+\/[^/]+)\/releases.atom$/, GHReleaseFeed)
 
       if (!store.feeds) {
         store.feeds = {}

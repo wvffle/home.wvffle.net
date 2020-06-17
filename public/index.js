@@ -5450,7 +5450,7 @@ const e = (s, ...c) => {
     }
 
     const html = sanitize(child.toString(), {
-      allowedTags: ['a', 'img', 'pre', 'code'],
+      allowedTags: ['a', 'img', 'pre', 'code', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'],
       allowedAttributes: {
         a: ['href'],
         img: ['src'],
@@ -6996,11 +6996,8 @@ class RSSFetcher {
     };
     delete meta.items;
     let FeedClass = RSSFeed;
-    console.log(_classPrivateFieldGet(this, _feedTypes));
 
     for (const [regex, Feed] of _classPrivateFieldGet(this, _feedTypes)) {
-      console.log(regex, url, regex.test(url), Feed);
-
       if (regex.test(url)) {
         FeedClass = Feed;
         break;
