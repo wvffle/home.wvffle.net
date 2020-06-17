@@ -114,11 +114,11 @@
       })
 
       class YoutubeFeed extends RSSFeed {
-        #iframe = null
+        iframe = null
 
         get content () {
-          if (this.#iframe) {
-            return this.#iframe
+          if (this.iframe) {
+            return this.iframe
           }
 
           const iframe = e('iframe')
@@ -129,7 +129,7 @@
           iframe.width = 538
           iframe.height = 538 * 9 / 16
 
-          return (this.#iframe = iframe)
+          return (this.iframe = iframe)
         }
       }
 
