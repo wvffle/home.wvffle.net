@@ -108,7 +108,7 @@
       const fetcher = new RSSFetcher(store)
 
       // YouTube channel RSS
-      const ytRegex = /^https:\/\/(?:www\.)?youtube\.com\/channel\/(UC.+)$/
+      const ytRegex = /^https:\/\/(?:www\.)?youtube\.com\/(?:channel\/|feeds\/videos.xml\?channel_id=)(UC.{22})$/
       URLTransformer.register(ytRegex, (url, id) => {
         return `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`
       })
