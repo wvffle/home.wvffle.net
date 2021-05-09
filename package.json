@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "fastify": "^2.14.1",
+    "fastify": "^2.15.1",
     "lodash.set": "^4.3.2",
     "mime": "^2.4.6",
     "sanitize-html": "^2.3.2"
